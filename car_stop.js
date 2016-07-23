@@ -1,25 +1,25 @@
-var rpio = require('rpio');
-var consloe = require('console');
+var Rpio = require('rpio');
+var Consloe = require('console');
 
 /* Configure P11 as an output pin, setting its initial state to low */
-rpio.open(11, rpio.OUTPUT, rpio.LOW);
-rpio.open(12, rpio.OUTPUT, rpio.LOW);
-rpio.open(13, rpio.OUTPUT, rpio.LOW);
-rpio.open(15, rpio.OUTPUT, rpio.LOW);
+Rpio.open(11, Rpio.OUTPUT, Rpio.LOW);
+Rpio.open(12, Rpio.OUTPUT, Rpio.LOW);
+Rpio.open(13, Rpio.OUTPUT, Rpio.LOW);
+Rpio.open(15, Rpio.OUTPUT, Rpio.LOW);
 
-var oDrive = {
-    stop : function(){
+var ODrive = {
+    stop: function () {
         // Close !
-        rpio.write(11, rpio.LOW);
-        rpio.write(12, rpio.LOW);
-        rpio.write(13, rpio.LOW);
-        rpio.write(15, rpio.LOW);
+        Rpio.write(11, Rpio.LOW);
+        Rpio.write(12, Rpio.LOW);
+        Rpio.write(13, Rpio.LOW);
+        Rpio.write(15, Rpio.LOW);
 
-        rpio.close(11);
-        rpio.close(12);
-        rpio.close(13);
-        rpio.close(15);
+        Rpio.close(11);
+        Rpio.close(12);
+        Rpio.close(13);
+        Rpio.close(15);
     }
 };
 
-oDrive.stop();
+ODrive.stop();

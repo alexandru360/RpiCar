@@ -1,79 +1,79 @@
-var rpio = require('rpio');
-var consloe = require('console');
+var Rpio = require("rpio");
+//var Consloe = require("console");
 
-function initalizePins(){
+function InitalizePins() {
     /* Configure P11, 12, 13, 15 as an output pins, setting its initial state to low */
-    rpio.open(11, rpio.OUTPUT, rpio.LOW);
-    rpio.open(12, rpio.OUTPUT, rpio.LOW);
-    rpio.open(13, rpio.OUTPUT, rpio.LOW);
-    rpio.open(15, rpio.OUTPUT, rpio.LOW);
+    Rpio.open(11, Rpio.OUTPUT, Rpio.LOW);
+    Rpio.open(12, Rpio.OUTPUT, Rpio.LOW);
+    Rpio.open(13, Rpio.OUTPUT, Rpio.LOW);
+    Rpio.open(15, Rpio.OUTPUT, Rpio.LOW);
 };
 
-var exports = module.exports = {};
+//var Exports = module.exports = {};
 
 exports.ActionDrive = {
-    driving : 0,
-    front : function(){
+    driving: 0,
+    front: function () {
         // if(driving > 0) stop();
-        
-        initalizePins();
+
+        InitalizePins();
         //Wheel 1
-        rpio.write(11, rpio.HIGH);
-        rpio.write(13, rpio.LOW);
+        Rpio.write(11, Rpio.HIGH);
+        Rpio.write(13, Rpio.LOW);
 
         //Wheel 2
-        rpio.write(15, rpio.LOW);
-        rpio.write(12, rpio.HIGH);
-        
-        driving = 1;
+        Rpio.write(15, Rpio.LOW);
+        Rpio.write(12, Rpio.HIGH);
+
+        //var driving = 1;
     },
-    back : function(){
-        initalizePins();
+    back: function () {
+        InitalizePins();
         //Wheel 1
-        rpio.write(11, rpio.LOW);
-        rpio.write(13, rpio.HIGH);
+        Rpio.write(11, Rpio.LOW);
+        Rpio.write(13, Rpio.HIGH);
 
         //Wheel 2
-        rpio.write(15, rpio.HIGH);
-        rpio.write(12, rpio.LOW);
+        Rpio.write(15, Rpio.HIGH);
+        Rpio.write(12, Rpio.LOW);
     },
-    left : function(){
-        initalizePins();
+    left: function () {
+        InitalizePins();
         //Wheel 1
-        rpio.write(11, rpio.LOW);
-        rpio.write(13, rpio.HIGH);
+        Rpio.write(11, Rpio.LOW);
+        Rpio.write(13, Rpio.HIGH);
 
         //Wheel 2
-        rpio.write(15, rpio.LOW);
-        rpio.write(12, rpio.HIGH);
+        Rpio.write(15, Rpio.LOW);
+        Rpio.write(12, Rpio.HIGH);
     },
-    right : function(){
-        initalizePins();
+    right: function () {
+        InitalizePins();
         //Wheel 1
-        rpio.write(11, rpio.HIGH);
-        rpio.write(13, rpio.LOW);
+        Rpio.write(11, Rpio.HIGH);
+        Rpio.write(13, Rpio.LOW);
 
         //Wheel 2
-        rpio.write(15, rpio.HIGH);
-        rpio.write(12, rpio.LOW);
+        Rpio.write(15, Rpio.HIGH);
+        Rpio.write(12, Rpio.LOW);
     },
     // stop : "dealocateAndClosePins()",
-    carWrapperTest : function(){
+    carWrapperTest: function () {
         console.log("Car api online and loaded ...");
     }
 };
 
-exports.ActionDrive.stop = function dealocateAndClosePins(){
+exports.ActionDrive.stop = function dealocateAndClosePins() {
     // Close !
-    rpio.write(11, rpio.LOW);
-    rpio.write(12, rpio.LOW);
-    rpio.write(13, rpio.LOW);
-    rpio.write(15, rpio.LOW);
+    Rpio.write(11, Rpio.LOW);
+    Rpio.write(12, Rpio.LOW);
+    Rpio.write(13, Rpio.LOW);
+    Rpio.write(15, Rpio.LOW);
 
-    rpio.close(11);
-    rpio.close(12);
-    rpio.close(13);
-    rpio.close(15);
-    
+    Rpio.close(11);
+    Rpio.close(12);
+    Rpio.close(13);
+    Rpio.close(15);
+
     // driving = 0;
 };

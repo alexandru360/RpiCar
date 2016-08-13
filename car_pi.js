@@ -1,5 +1,4 @@
 var Rpio = require("rpio");
-//var Consloe = require("console");
 
 function InitalizePins() {
     /* Configure P11, 12, 13, 15 as an output pins, setting its initial state to low */
@@ -9,14 +8,11 @@ function InitalizePins() {
     Rpio.open(15, Rpio.OUTPUT, Rpio.LOW);
 };
 
-//var Exports = module.exports = {};
-
 exports.ActionDrive = {
     driving: 0,
     front: function () {
-        // if(driving > 0) stop();
-
         InitalizePins();
+
         //Wheel 1
         Rpio.write(11, Rpio.HIGH);
         Rpio.write(13, Rpio.LOW);
@@ -29,6 +25,7 @@ exports.ActionDrive = {
     },
     back: function () {
         InitalizePins();
+
         //Wheel 1
         Rpio.write(11, Rpio.LOW);
         Rpio.write(13, Rpio.HIGH);
@@ -39,6 +36,7 @@ exports.ActionDrive = {
     },
     left: function () {
         InitalizePins();
+
         //Wheel 1
         Rpio.write(11, Rpio.LOW);
         Rpio.write(13, Rpio.HIGH);
@@ -49,6 +47,7 @@ exports.ActionDrive = {
     },
     right: function () {
         InitalizePins();
+
         //Wheel 1
         Rpio.write(11, Rpio.HIGH);
         Rpio.write(13, Rpio.LOW);
@@ -57,7 +56,6 @@ exports.ActionDrive = {
         Rpio.write(15, Rpio.HIGH);
         Rpio.write(12, Rpio.LOW);
     },
-    // stop : "dealocateAndClosePins()",
     carWrapperTest: function () {
         console.log("Car api online and loaded ...");
     }
@@ -74,6 +72,4 @@ exports.ActionDrive.stop = function dealocateAndClosePins() {
     Rpio.close(12);
     Rpio.close(13);
     Rpio.close(15);
-
-    // driving = 0;
 };

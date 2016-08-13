@@ -41,27 +41,60 @@ ol {list-style-type: none;}
     font-style: italic;
 }
 
+table{
+    width:100%;
+}
 </style>
 
 <script src="jquery-2.2.4.min.js"></script>
 
 </head>
 <body>
-    <ol>
-        <li><div id='blockMessages' class='div-common div-msg'>Play !</div></li>
-        <li><div id='divForward' class='div-common div_btn' onclick="callCarApi('front')"><< Forward >></div></li>
-        <li><div id='divBackward' class='div-common div_btn'  onclick="callCarApi('back')"><< Back >></div></li>
-        <li><div id='divRight' class='div-common div_btn' onclick="callCarApi('right')"><< Right >></div></li>
-        <li><div id='divLeft' class='div-common div_btn' onclick="callCarApi('left')"><< Left >></div></li>
-        <li><div id='divStop' class='div-common div_btn' onclick="callCarApi('stop')"><< Stop ! >></div></li>
-    </ol>
+    <table>
+        <tr>
+            <td>
+                <ol>
+                    <li><div id='blockMessages' class='div-common div-msg'>Play !</div></li>
+                    <li><div id='divForward' class='div-common div_btn' onclick="callCarApi('front')"><< Forward >></div></li>
+                    <li><div id='divBackward' class='div-common div_btn'  onclick="callCarApi('back')"><< Back >></div></li>
+                    <li><div id='divRight' class='div-common div_btn' onclick="callCarApi('right')"><< Right >></div></li>
+                    <li><div id='divLeft' class='div-common div_btn' onclick="callCarApi('left')"><< Left >></div></li>
+                    <li><div id='divStop' class='div-common div_btn' onclick="callCarApi('stop')"><< Stop ! >></div></li>
+                </ol>
+            </td>
+        </tr>
+        <tr>
+            <!--De executat in consola !-->
+            <!--raspivid -o - -t 9999999 -w 800 -h 600 --hflip | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8080}' :demux=h264-->
+            <td>
+                <OBJECT classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
+                    codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab"
+                    width="480" height="320" id="vlc" events="True">
+                    <param name="Src" value="http://192.168.100.14:8080/" />
+                    <param name="ShowDisplay" value="True" />
+                    <param name="AutoLoop" value="False" />
+                    <param name="AutoPlay" value="True" />
+                    <embed id="vlcEmb" type="application/x-google-vlc-plugin" 
+                    version="VideoLAN.VLCPlugin.2" autoplay="yes" loop="no" width="480" height="320"
+                    target="http://192.168.100.14:8080/" ></embed>
+                </OBJECT>
+            </td>
+        </tr>
+    </table>
     
     <script>
+	    var oIp = $.getJSON("serverip.json", function(json) { console.log(json); });
+        var oVlcCtl = $("#vlcEmb");
+
         $( document ).ready(function() {
             $("#divStop").hide();
+
+            var cTarget = "http://" + oIp + ":8080/"
+            oVlcCtl.setAttribute("target",cTarget);
         });
+
         function callCarApi(action){
-            var destinationUrl = "http://localhost:3000/api/?action=" + action;
+            var destinationUrl = "http://"+oIp.responseJSON.ipAdress+":3000/api/?action=" + action;
             console.log(destinationUrl);
             if(action != 'stop') $("#divStop").show();
             else $("#divStop").hide();

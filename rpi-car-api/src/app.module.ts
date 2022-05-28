@@ -1,10 +1,36 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {Logger, MiddlewareConsumer, Module} from '@nestjs/common';
+import {ConfigModule} from '@nestjs/config';
+import {getEnvPath} from './common/helper/env.helper';
+import LogsMiddleware from "./middleware/logs.middleware";
+import {ServeStaticModule} from "@nestjs/serve-static";
+import {join} from 'path';
+import {InitializeCarPinsService} from './services/initialize-car-pins/initialize-car-pins.service';
+import {HealthCheckService} from './services/health-check/health-check.service';
+import {HealthCheckController} from './controllers/health-check/health-check.controller';
+
+const logger = new Logger('AppModule');
+
+const envFilePath: string = getEnvPath(`${__dirname}/common/envs`);
+logger.log(`Using env file: ${envFilePath}`);
+
+const staticPath = join(__dirname, '..', '..', 'rpi-car-ui', 'public');
+logger.log(`Using static dir path: ${staticPath}`);
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ConfigModule.forRoot({envFilePath, isGlobal: true}),
+        ServeStaticModule.forRoot({rootPath: staticPath}),
+    ],
+    controllers: [
+        HealthCheckController
+    ],
+    providers: [
+        InitializeCarPinsService,
+        HealthCheckService
+    ],
 })
-export class AppModule {}
+export class AppModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(LogsMiddleware).forRoutes('*');
+    }
+}

@@ -7,6 +7,8 @@ import {join} from 'path';
 import {InitializeCarPinsService} from './services/initialize-car-pins/initialize-car-pins.service';
 import {HealthCheckService} from './services/health-check/health-check.service';
 import {HealthCheckController} from './controllers/health-check/health-check.controller';
+import { CarActionsService } from './services/car-actions/car-actions.service';
+import { CarActionsController } from './controllers/car-actions/car-actions.controller';
 
 const logger = new Logger('AppModule');
 
@@ -22,11 +24,13 @@ logger.log(`Using static dir path: ${staticPath}`);
         ServeStaticModule.forRoot({rootPath: staticPath}),
     ],
     controllers: [
-        HealthCheckController
+        HealthCheckController,
+        CarActionsController
     ],
     providers: [
         InitializeCarPinsService,
-        HealthCheckService
+        HealthCheckService,
+        CarActionsService
     ],
 })
 export class AppModule {

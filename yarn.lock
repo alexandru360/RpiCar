@@ -1223,6 +1223,13 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@goldstack/utils-typescript-references@^0.1.13":
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/@goldstack/utils-typescript-references/-/utils-typescript-references-0.1.13.tgz#b2bf3158061062d491e3e64cc185c0d959625308"
+  integrity sha512-7fidEwf/QXkfqWRSrNn76NMmtKZQv/9U4iw66xo233IPwbA1/vbTDCIhgIYWyEAZdX7Xnb59WILi9PuBb7khGA==
+  dependencies:
+    source-map-support "^0.5.21"
+
 "@humanwhocodes/config-array@^0.9.2":
   version "0.9.5"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.9.5.tgz#2cbaf9a89460da24b5ca6531b8bbfc23e1df50c7"
@@ -9078,7 +9085,7 @@ source-map-support@0.5.13:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
 
-source-map-support@0.5.21, source-map-support@^0.5.20, source-map-support@^0.5.6, source-map-support@~0.5.20:
+source-map-support@0.5.21, source-map-support@^0.5.20, source-map-support@^0.5.21, source-map-support@^0.5.6, source-map-support@~0.5.20:
   version "0.5.21"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
   integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==

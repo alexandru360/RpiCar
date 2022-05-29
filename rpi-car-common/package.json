@@ -1,5 +1,8 @@
 {
   "name": "rpi-car-common",
   "version": "1.0.0",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@goldstack/utils-typescript-references": "^0.1.13"
+  }
 }

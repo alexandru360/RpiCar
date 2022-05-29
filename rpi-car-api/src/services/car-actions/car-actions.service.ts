@@ -19,4 +19,16 @@ export class CarActionsService {
 
         return true;
     }
+
+    public closePin(pin: number): boolean {
+        try {
+            Rpio.close(pin);
+            logger.log(`Closing pin ${pin}`);
+        }catch(e){
+            logger.error(`Error closing pin ${pin}: ${e}`);
+            return false;
+        }
+
+        return true;
+    }
 }

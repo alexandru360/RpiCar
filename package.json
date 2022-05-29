@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "start": "start both api and ui bundeled !",
-    "start:api:dev": "sudo export API_PORT=5000 && yarn workspace rpi-car-api start:dev",
-    "start:api:prod": "sudo export NODE_ENV=production && set API_PORT=5001 && yarn workspace rpi-car-api start:dev",
+    "start:api:dev": "export API_PORT=5000 && yarn workspace rpi-car-api start:dev",
+    "start:api:prod": "export NODE_ENV=production && set API_PORT=5001 && yarn workspace rpi-car-api start:dev",
     "start:ui": "yarn workspace yarn workspace rpi-car-ui react-scripts start",
     "build": "yarn workspace yarn workspace rpi-car-ui react-scripts build",
     "test": "yarn workspace yarn workspace rpi-car-ui react-scripts test",

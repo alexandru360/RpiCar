@@ -1,112 +1,170 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Welcome page</title>
-<style type="text/css" media="screen">
-body { background: green; font-family: Verdana, sans-serif; font-size: 11pt; min-width: 60px; }
-#page { background: #ffffff; margin: 50px; border: 2px solid #c0c0c0; padding: 10px; }
-#header { background: #4b6983; border: 2px solid #7590ae; text-align: center; padding: 10px; color: #ffffff; }
-#header h1 { color: #ffffff; }
-#body { padding: 10px; }
-span.tt { font-family: monospace; }
-span.bold { font-weight: bold; }
-a:link { text-decoration: none; font-weight: bold; color: #C00; background: #ffc; }
-a:visited { text-decoration: none; font-weight: bold; color: #999; background: #ffc; }
-a:active { text-decoration: none; font-weight: bold; color: #F00; background: #FC0; }
-a:hover { text-decoration: none; color: #C00; background: #FC0; }
-li { padding: 10px; margin: 10px; }
-ol {list-style-type: none;}
-
-.div-common{
-    height: 8em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    min-width: 20px;
-}
-.div_btn{
-    background-color: coral;
-    margin : 5px;
-    padding : 3px;
-    
-    color: black;
-    font-weight: bold;
-}
-
-.div-msg{
-    background-color: #FC0;
-    font-weight: 400;
-    font-style: italic;
-}
-
-table{
-    width:100%;
-}
-</style>
-
-<script src="jquery-2.2.4.min.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Control</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .distance-display {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            width: 250px;
+            user-select: all;
+        }
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            width: 300px;
+            height: 400px;
+        }
+        .control-panel button {
+            width: 100%;
+            height: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #007BFF;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .control-panel button:hover {
+            background-color: #0056b3;
+        }
+        .control-panel button:active {
+            background-color: #003f7f;
+        }
+        #btn-stop {
+            background-color: #800020; /* Visiniu */
+        }
+        #btn-stop:hover {
+            background-color: #4d0015; /* Visiniu inchis */
+        }
+        #btn-sensorleft, #btn-sensorright, #btn-sensorhome {
+            background-color: #FFA500; /* Orange */
+        }
+        #btn-sensorleft:hover, #btn-sensorright:hover, #btn-sensorhome:hover {
+            background-color: #CC8400; /* Darker Orange */
+        }
+    </style>
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" />
 </head>
 <body>
-    <table>
-        <tr>
-            <td>
-                <ol>
-                    <li><div id='blockMessages' class='div-common div-msg'>Play !</div></li>
-                    <li><div id='divForward' class='div-common div_btn' onclick="callCarApi('front')"><< Forward >></div></li>
-                    <li><div id='divBackward' class='div-common div_btn'  onclick="callCarApi('back')"><< Back >></div></li>
-                    <li><div id='divRight' class='div-common div_btn' onclick="callCarApi('right')"><< Right >></div></li>
-                    <li><div id='divLeft' class='div-common div_btn' onclick="callCarApi('left')"><< Left >></div></li>
-                    <li><div id='divStop' class='div-common div_btn' onclick="callCarApi('stop')"><< Stop ! >></div></li>
-                </ol>
-            </td>
-        </tr>
-        <tr>
-            <!--De executat in consola !-->
-            <!--raspivid -o - -t 9999999 -w 800 -h 600 --hflip | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8080}' :demux=h264-->
-            <td>
-                <OBJECT classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921"
-                    codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab"
-                    width="480" height="320" id="vlc" events="True">
-                    <param name="Src" value="http://192.168.100.14:8080/" />
-                    <param name="ShowDisplay" value="True" />
-                    <param name="AutoLoop" value="False" />
-                    <param name="AutoPlay" value="True" />
-                    <embed id="vlcEmb" type="application/x-google-vlc-plugin" 
-                    version="VideoLAN.VLCPlugin.2" autoplay="yes" loop="no" width="480" height="320"
-                    target="http://192.168.100.14:8080/" ></embed>
-                </OBJECT>
-            </td>
-        </tr>
-    </table>
-    
+    <div class="distance-display" id="distance">Distance: -- mm / -- cm / -- m</div>
+    <div class="control-panel">
+        <div></div>
+        <button id="btn-up">UP</button>
+        <div></div>
+        <button id="btn-left">LEFT</button>
+        <button id="btn-stop">STOP</button>
+        <button id="btn-right">RIGHT</button>
+        <div></div>
+        <button id="btn-down">DOWN</button>
+        <div></div>
+        <button id="btn-sensorleft">↺ SENSOR LEFT</button>
+        <button id="btn-sensorhome">SENSOR CENTER</button>
+        <button id="btn-sensorright">SENSOR RIGHT ↻</button>
+    </div>
+
     <script>
-	    var oIp = $.getJSON("serverip.json", function(json) { console.log(json); });
-        var oVlcCtl = $("#vlcEmb");
-
-        $( document ).ready(function() {
-            $("#divStop").hide();
-
-            var cTarget = "http://" + oIp + ":8080/"
-            oVlcCtl.setAttribute("target",cTarget);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js').then(reg => {
+                console.log('Service Worker registered!', reg);
+            }).catch(err => {
+                console.error('Service Worker registration failed!', err);
+            });
+        }
+    
+        const apiBaseUrl = "/api";
+    
+        // Helper function to send API requests
+        function sendCommand(endpoint) {
+            $.get(`${apiBaseUrl}/${endpoint}`)
+                .done(() => console.log(`${endpoint} command sent`))
+                .fail(() => console.error(`Failed to send ${endpoint} command`));
+        }
+    
+        function fetchDistance() {
+            $.get(`${apiBaseUrl}/sonar`)
+                .done((data) => {
+                    const mm = data.distance_mm;
+                    const cm = (mm / 10).toFixed(2);
+                    const meters = (mm / 1000).toFixed(3);
+                    $("#distance").text(`Distance: ${mm} mm / ${cm} cm / ${meters} m`);
+                })
+                .fail(() => {
+                    $("#distance").text("Distance: Error retrieving data");
+                });
+        }
+    
+        setInterval(fetchDistance, 1000);
+    
+        // Prevent text selection and improve mobile responsiveness
+        function attachButtonListeners(buttonId, command) {
+            const button = $(`#${buttonId}`);
+    
+            // Add event listeners for mouse and touch events
+            button.on("mousedown touchstart", (e) => {
+                e.preventDefault(); // Prevent text selection or default behavior
+                sendCommand(command);
+            });
+    
+            button.on("mouseup mouseleave touchend", (e) => {
+                e.preventDefault(); // Prevent text selection or default behavior
+                sendCommand("stop");
+            });
+        }
+    
+        // Attach listeners to movement buttons
+        attachButtonListeners("btn-up", "reverse");
+        attachButtonListeners("btn-down", "forward");
+        attachButtonListeners("btn-left", "left");
+        attachButtonListeners("btn-right", "right");
+    
+        // Special case for the STOP button
+        $("#btn-stop").on("click touchstart", (e) => {
+            e.preventDefault(); // Prevent default behavior
+            sendCommand("stop");
         });
 
-        function callCarApi(action){
-            var destinationUrl = "http://"+oIp.responseJSON.ipAdress+":3000/api/?action=" + action;
-            console.log(destinationUrl);
-            if(action != 'stop') $("#divStop").show();
-            else $("#divStop").hide();
-            var callApi = $.ajax({
-                type: 'POST',
-                dataType: 'text',
-                url: destinationUrl,
-                success: function(resultData) { console.log(resultData); }
-            });
-            callApi.error(function(error) { console.log("Something went wrong"); console.log(error) });
-        }
+        // Attach listeners for sensor buttons
+        $("#btn-sensorleft").on("click touchstart", (e) => {
+            e.preventDefault();
+            sendCommand("sensorright");
+        });
+
+        $("#btn-sensorright").on("click touchstart", (e) => {
+            e.preventDefault();
+            sendCommand("sensorleft");
+        });
+
+        $("#btn-sensorhome").on("click touchstart", (e) => {
+            e.preventDefault();
+            sendCommand("sensorcenter");
+        });
     </script>
-    
 </body>
 </html>

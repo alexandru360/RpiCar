@@ -16,6 +16,10 @@ SERVO_PIN = 18  # PWM Pin for SG90 servo
 TRIG = 16  # GPIO pin for trigger
 ECHO = 20  # GPIO pin for echo
 
+# IR Sensor Pins
+IR_SENSOR_LEFT = 19   # GPIO19 (Physical Pin 35)
+IR_SENSOR_RIGHT = 13  # GPIO13 (Physical Pin 33)
+
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(IN1, GPIO.OUT)
@@ -24,6 +28,8 @@ GPIO.setup(IN3, GPIO.OUT)
 GPIO.setup(IN4, GPIO.OUT)
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
+GPIO.setup(IR_SENSOR_LEFT, GPIO.IN)
+GPIO.setup(IR_SENSOR_RIGHT, GPIO.IN)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -116,11 +122,22 @@ def sensor_center():
     pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
     return "Servo centered", 200
 
-@app.route('/sonar', methods=['GET'])
+def read_ir_sensors():
+    """Read IR sensor states"""
+    left_state = GPIO.input(IR_SENSOR_LEFT)
+    right_state = GPIO.input(IR_SENSOR_RIGHT)
+    return {"left": left_state, "right": right_state}
+
+@app.route('/api/sonar', methods=['GET'])
 def handle_sonar():
     """Handle sonar API request and return distance in mm."""
     distance = measure_distance()
     return jsonify({"distance_mm": distance}), 200
+
+@app.route('/api/irsensors', methods=['GET'])
+def handle_ir_sensors():
+    """API to return IR sensor readings"""
+    return jsonify(read_ir_sensors()), 200
 
 @app.route('/forward', methods=['GET'])
 def handle_forward():
@@ -161,7 +178,7 @@ def handle_sensor_center():
 
 if __name__ == "__main__":
     try:
-        print("Starting Flask server. Use endpoints /api/sonar, /forward, /reverse, /left, /right, /stop, /sensorleft, /sensorright, /sensorcenter")
+        print("Starting Flask server. Use endpoints /api/sonar, /api/irsensors, /forward, /reverse, /left, /right, /stop, /sensorleft, /sensorright, /sensorcenter")
         app.run(host="0.0.0.0", port=5000)
     finally:
         GPIO.cleanup()

@@ -1,7 +1,8 @@
-from flask import Flask, jsonify
 import RPi.GPIO as GPIO
 import pigpio
 import time
+import cv2
+from flask import Flask, jsonify, Response, stream_with_context
 
 # GPIO pins for L298N motor driver
 IN1 = 23  # IN1 connected to GPIO 23
@@ -43,6 +44,21 @@ INCREMENT = 100       # 10-degree increment (adjust as needed)
 current_pulse = CENTER_PULSE  # Store the current position
 
 pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)  # Start at center
+
+# OpenCV Video Capture (change device index if needed, e.g., 0, 1, etc.)
+camera = cv2.VideoCapture(0)
+
+def generate_frames():
+    """Capture frames from the camera and stream them as MJPEG."""
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame_bytes = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
 def stop():
     """Stop all motors."""
@@ -128,13 +144,13 @@ def read_ir_sensors():
     right_state = GPIO.input(IR_SENSOR_RIGHT)
     return {"left": left_state, "right": right_state}
 
-@app.route('/api/sonar', methods=['GET'])
+@app.route('/sonar', methods=['GET'])
 def handle_sonar():
     """Handle sonar API request and return distance in mm."""
     distance = measure_distance()
     return jsonify({"distance_mm": distance}), 200
 
-@app.route('/api/irsensors', methods=['GET'])
+@app.route('/irsensors', methods=['GET'])
 def handle_ir_sensors():
     """API to return IR sensor readings"""
     return jsonify(read_ir_sensors()), 200
@@ -175,6 +191,11 @@ def handle_sensor_right():
 @app.route('/sensorcenter', methods=['GET'])
 def handle_sensor_center():
     return sensor_center()
+
+@app.route('/video-stream')
+def video_stream():
+    """Flask route to stream video from USB OTG camera."""
+    return Response(stream_with_context(generate_frames()), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
     try:

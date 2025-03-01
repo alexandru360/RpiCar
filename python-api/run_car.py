@@ -48,17 +48,17 @@ pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)  # Start at center
 # OpenCV Video Capture (change device index if needed, e.g., 0, 1, etc.)
 camera = cv2.VideoCapture(0)
 
-def generate_frames():
-    """Capture frames from the camera and stream them as MJPEG."""
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+# def generate_frames():
+#     """Capture frames from the camera and stream them as MJPEG."""
+#     while True:
+#         success, frame = camera.read()
+#         if not success:
+#             break
+#         else:
+#             ret, buffer = cv2.imencode('.jpg', frame)
+#             frame_bytes = buffer.tobytes()
+#             yield (b'--frame\r\n'
+#                    b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
 def stop():
     """Stop all motors."""
@@ -195,7 +195,8 @@ def handle_sensor_center():
 @app.route('/video-stream')
 def video_stream():
     """Flask route to stream video from USB OTG camera."""
-    return Response(stream_with_context(generate_frames()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    # return Response(stream_with_context(generate_frames()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response("Streaming video.")
 
 if __name__ == "__main__":
     try:

@@ -42,10 +42,10 @@ for PACKAGE in "${REQUIRED_PACKAGES[@]}"; do
 done
 
 # Ensure pigpiod daemon is running
-if ! pgrep -x "pigpiod" > /dev/null; then
-    echo "Starting pigpiod service..."
-    sudo systemctl start pigpiod || { echo "Failed to start pigpiod!"; exit 1; }
-fi
+#if ! pgrep -x "pigpiod" > /dev/null; then
+#    echo "Starting pigpiod service..."
+#    sudo systemctl start pigpiod || { echo "Failed to start pigpiod!"; exit 1; }
+#fi
 
 # Run the Python application
 echo "Starting run_car.py..."

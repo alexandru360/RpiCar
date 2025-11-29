@@ -1,0 +1,18 @@
+[Unit]
+Description=RpiCar Control Service
+After=network.target pigpiod.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/RpiCar/python-api
+ExecStart=/home/pi/RpiCar/python-api/env/bin/python /home/pi/RpiCar/python-api/run_car.py
+ExecStop=/bin/bash -lc '/home/pi/RpiCar/python-api/env/bin/python - <<"PY"\nimport RPi.GPIO as GPIO\ntry: GPIO.cleanup()\nexcept: pass\ntry: import pigpio; pi=pigpio.pi(); pi.stop()\nexcept: pass\nPY'
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

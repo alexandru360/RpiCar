@@ -1,6 +1,9 @@
 [Unit]
 Description=RpiCar Control Service
+Wants=pigpiod.service
 After=network.target pigpiod.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple

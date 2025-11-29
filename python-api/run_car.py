@@ -44,6 +44,25 @@ app = Flask(__name__)
 # Initialize pigpio for servo control
 try:
     pi = pigpio.pi()
+    # pigpio.pi() may return an object even when it failed to connect
+    # (its internal socket may be None). Check the `connected` attribute
+    # and treat a non-connected instance as unavailable.
+    if not getattr(pi, "connected", 0):
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        print("Can't connect to pigpio at localhost(8888)")
+        print("Did you start the pigpio daemon? E.g. sudo pigpiod")
+        print("Did you specify the correct Pi host/port in the environment")
+        print("variables PIGPIO_ADDR/PIGPIO_PORT?")
+        print("E.g. export PIGPIO_ADDR=soft, export PIGPIO_PORT=8888")
+        print("Did you specify the correct Pi host/port in the")
+        print("pigpio.pi() function? E.g. pigpio.pi('soft', 8888)")
+        print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        try:
+            # try to stop/cleanup the returned object if it exposes stop
+            pi.stop()
+        except Exception:
+            pass
+        pi = None
 except Exception:
     pi = None
 CENTER_PULSE = 1500  # Center position
@@ -229,7 +248,21 @@ if __name__ == "__main__":
         print("Starting Flask server. Use endpoints /api/sonar, /api/irsensors, /forward, /reverse, /left, /right, /stop, /sensorleft, /sensorright, /sensorcenter")
         app.run(host="0.0.0.0", port=5000)
     finally:
-        GPIO.cleanup()
-        pi.set_servo_pulsewidth(SERVO_PIN, 0)  # Turn off servo
-        pi.stop()
+        try:
+            GPIO.cleanup()
+        except Exception:
+            pass
+        # Only call pigpio methods if we successfully connected earlier
+        try:
+            if pi:
+                try:
+                    pi.set_servo_pulsewidth(SERVO_PIN, 0)  # Turn off servo
+                except Exception:
+                    pass
+                try:
+                    pi.stop()
+                except Exception:
+                    pass
+        except Exception:
+            pass
         print("GPIO cleaned up. Goodbye!")

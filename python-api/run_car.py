@@ -70,6 +70,12 @@ LEFT_LIMIT = 1000    # Maximum left
 RIGHT_LIMIT = 2000   # Maximum right
 INCREMENT = 100       # 10-degree increment (adjust as needed)
 current_pulse = CENTER_PULSE  # Store the current position
+# Sonar cache + retry settings
+LAST_DISTANCE = None
+LAST_DISTANCE_TIME = 0
+CACHE_MAX_AGE = 5.0  # seconds to consider last value fresh
+RETRY_COUNT = 3
+RETRY_DELAY = 0.05  # seconds between retries
 
 if pi:
     pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)  # Start at center
@@ -138,13 +144,14 @@ def measure_distance():
         pulse_duration = pulse_end - pulse_start
         distance_mm = (pulse_duration * 17150) * 10  # Convert to mm
         return round(distance_mm, 2)
-    except TimeoutError:
-        # Timeout waiting for echo — return None to indicate no reading
+    except TimeoutError as e:
+        print(f"measure_distance: timeout: {e}")
         return None
-    except RuntimeError:
-        # GPIO not setup correctly
+    except RuntimeError as e:
+        print(f"measure_distance: runtime error: {e}")
         return None
-    except Exception:
+    except Exception as e:
+        print(f"measure_distance: unexpected error: {e}")
         return None
 
 def sensor_left():
@@ -211,10 +218,25 @@ def read_ir_sensors():
 @app.route('/api/sonar', methods=['GET'])
 def handle_sonar():
     """Handle sonar API request and return distance in mm."""
-    distance = measure_distance()
-    if distance is None:
-        return jsonify({"distance_mm": None, "error": "no reading"}), 504
-    return jsonify({"distance_mm": distance}), 200
+    global LAST_DISTANCE, LAST_DISTANCE_TIME
+    # Try a small number of retries before giving up
+    distance = None
+    for attempt in range(RETRY_COUNT):
+        distance = measure_distance()
+        if distance is not None:
+            break
+        time.sleep(RETRY_DELAY)
+
+    if distance is not None:
+        LAST_DISTANCE = distance
+        LAST_DISTANCE_TIME = time.time()
+        return jsonify({"distance_mm": distance}), 200
+
+    # No fresh reading — return last known value if it's recent
+    if LAST_DISTANCE is not None and (time.time() - LAST_DISTANCE_TIME) <= CACHE_MAX_AGE:
+        return jsonify({"distance_mm": LAST_DISTANCE, "cached": True}), 200
+
+    return jsonify({"distance_mm": None, "error": "no reading"}), 504
 
 @app.route('/irsensors', methods=['GET'])
 @app.route('/api/irsensors', methods=['GET'])

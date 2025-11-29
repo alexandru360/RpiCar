@@ -111,23 +111,41 @@ def turn_right():
 
 def measure_distance():
     """Measure distance using HC-SR04 sonar sensor and return distance in mm."""
-    GPIO.output(TRIG, True)
-    time.sleep(0.00001)  # Send 10µs pulse
-    GPIO.output(TRIG, False)
+    try:
+        # Ensure trigger is low, send a short pulse, then measure echo with timeouts
+        GPIO.output(TRIG, False)
+        time.sleep(0.00005)
+        GPIO.output(TRIG, True)
+        time.sleep(0.00001)  # Send 10µs pulse
+        GPIO.output(TRIG, False)
 
-    pulse_start = time.time()
-    pulse_end = time.time()
+        timeout = 0.02  # 20ms max wait for edge (adjust if needed)
 
-    while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
+        start_wait = time.time()
+        while GPIO.input(ECHO) == 0:
+            pulse_start = time.time()
+            if time.time() - start_wait > timeout:
+                raise TimeoutError("Echo start timeout")
 
-    while GPIO.input(ECHO) == 1:
         pulse_end = time.time()
+        start_wait = time.time()
+        while GPIO.input(ECHO) == 1:
+            pulse_end = time.time()
+            if time.time() - start_wait > timeout:
+                raise TimeoutError("Echo end timeout")
 
-    pulse_duration = pulse_end - pulse_start
-    distance_mm = (pulse_duration * 17150) * 10  # Convert to mm
-
-    return round(distance_mm, 2)
+        pulse_duration = pulse_end - pulse_start
+        distance_mm = (pulse_duration * 17150) * 10  # Convert to mm
+        return round(distance_mm, 2)
+    except TimeoutError:
+        # Timeout waiting for echo — return None to indicate no reading
+        return None
+    except RuntimeError:
+        # GPIO not setup correctly
+        return None
+    except Exception:
+        return None
 
 def sensor_left():
     """Move the servo 10 degrees left (incrementally)."""
@@ -190,54 +208,67 @@ def read_ir_sensors():
     return {"left": left_state, "right": right_state}
 
 @app.route('/sonar', methods=['GET'])
+@app.route('/api/sonar', methods=['GET'])
 def handle_sonar():
     """Handle sonar API request and return distance in mm."""
     distance = measure_distance()
+    if distance is None:
+        return jsonify({"distance_mm": None, "error": "no reading"}), 504
     return jsonify({"distance_mm": distance}), 200
 
 @app.route('/irsensors', methods=['GET'])
+@app.route('/api/irsensors', methods=['GET'])
 def handle_ir_sensors():
     """API to return IR sensor readings"""
     return jsonify(read_ir_sensors()), 200
 
 @app.route('/forward', methods=['GET'])
+@app.route('/api/forward', methods=['GET'])
 def handle_forward():
     forward()
     return "Moving forward", 200
 
 @app.route('/reverse', methods=['GET'])
+@app.route('/api/reverse', methods=['GET'])
 def handle_reverse():
     reverse()
     return "Moving backward", 200
 
 @app.route('/left', methods=['GET'])
+@app.route('/api/left', methods=['GET'])
 def handle_left():
     turn_left()
     return "Turning left", 200
 
 @app.route('/right', methods=['GET'])
+@app.route('/api/right', methods=['GET'])
 def handle_right():
     turn_right()
     return "Turning right", 200
 
 @app.route('/stop', methods=['GET'])
+@app.route('/api/stop', methods=['GET'])
 def handle_stop():
     stop()
     return "Stopped", 200
 
 @app.route('/sensorleft', methods=['GET'])
+@app.route('/api/sensorleft', methods=['GET'])
 def handle_sensor_left():
     return sensor_left()
 
 @app.route('/sensorright', methods=['GET'])
+@app.route('/api/sensorright', methods=['GET'])
 def handle_sensor_right():
     return sensor_right()
 
 @app.route('/sensorcenter', methods=['GET'])
+@app.route('/api/sensorcenter', methods=['GET'])
 def handle_sensor_center():
     return sensor_center()
 
 @app.route('/video-stream')
+@app.route('/api/video-stream')
 def video_stream():
     """Flask route to stream video from USB OTG camera."""
     # return Response(video_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')

@@ -8,7 +8,8 @@ fi
 
 # Get the current directory where the script is located
 INSTALL_DIR="$(cd "$(dirname "$0")" && pwd)"
-SERVICE_NAME="rpi_car.service"
+# Standard service name used by this project
+SERVICE_NAME="rpicar.service"
 SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
 NGINX_CONF="/etc/nginx/sites-available/default"
 
@@ -60,16 +61,20 @@ fi
 echo "Creating systemd service: $SERVICE_NAME"
 tee $SERVICE_FILE > /dev/null <<EOF
 [Unit]
-Description=RpiCar Motor Control Service
-After=network.target
+Description=RpiCar Control Service
+After=network.target pigpiod.service
 
 [Service]
-ExecStart=$INSTALL_DIR/run_car.sh
-WorkingDirectory=$INSTALL_DIR
+Type=simple
+User=pi
+WorkingDirectory=$INSTALL_DIR/python-api
+ExecStart=$INSTALL_DIR/python-api/env/bin/python $INSTALL_DIR/python-api/run_car.py
+ExecStop=/bin/bash -lc '$INSTALL_DIR/python-api/env/bin/python - <<"PY"\nimport RPi.GPIO as GPIO\ntry: GPIO.cleanup()\nexcept: pass\ntry: import pigpio; pi=pigpio.pi(); pi.stop()\nexcept: pass\nPY'
+Restart=on-failure
+RestartSec=5
 StandardOutput=journal
 StandardError=journal
-Restart=always
-User=pi
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target

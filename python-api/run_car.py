@@ -3,6 +3,9 @@ import pigpio
 import time
 import cv2
 from flask import Flask, jsonify, Response
+import atexit
+import signal
+import sys
 # from camera_utils import video_stream
 
 
@@ -24,6 +27,7 @@ IR_SENSOR_LEFT = 19   # GPIO19 (Physical Pin 35)
 IR_SENSOR_RIGHT = 13  # GPIO13 (Physical Pin 33)
 
 # Setup GPIO
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(IN1, GPIO.OUT)
 GPIO.setup(IN2, GPIO.OUT)
@@ -38,14 +42,18 @@ GPIO.setup(IR_SENSOR_RIGHT, GPIO.IN)
 app = Flask(__name__)
 
 # Initialize pigpio for servo control
-pi = pigpio.pi()
+try:
+    pi = pigpio.pi()
+except Exception:
+    pi = None
 CENTER_PULSE = 1500  # Center position
 LEFT_LIMIT = 1000    # Maximum left
 RIGHT_LIMIT = 2000   # Maximum right
 INCREMENT = 100       # 10-degree increment (adjust as needed)
 current_pulse = CENTER_PULSE  # Store the current position
 
-pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)  # Start at center
+if pi:
+    pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)  # Start at center
 
 def stop():
     """Stop all motors."""
@@ -107,7 +115,8 @@ def sensor_left():
     global current_pulse
     if current_pulse - INCREMENT >= LEFT_LIMIT:
         current_pulse -= INCREMENT
-    pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
+    if pi:
+        pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
     return f"Servo moved left to {current_pulse}", 200
 
 def sensor_right():
@@ -115,15 +124,45 @@ def sensor_right():
     global current_pulse
     if current_pulse + INCREMENT <= RIGHT_LIMIT:
         current_pulse += INCREMENT
-    pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
+    if pi:
+        pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
     return f"Servo moved right to {current_pulse}", 200
 
 def sensor_center():
     """Move the servo back to center position."""
     global current_pulse
     current_pulse = CENTER_PULSE
-    pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
+    if pi:
+        pi.set_servo_pulsewidth(SERVO_PIN, current_pulse)
     return "Servo centered", 200
+
+
+def _cleanup():
+    try:
+        stop()
+    except Exception:
+        pass
+    try:
+        GPIO.cleanup()
+    except Exception:
+        pass
+    try:
+        if pi:
+            pi.set_servo_pulsewidth(SERVO_PIN, 0)
+            pi.stop()
+    except Exception:
+        pass
+
+
+def _handle_signal(signum, frame):
+    _cleanup()
+    sys.exit(0)
+
+
+# register cleanup handlers
+atexit.register(_cleanup)
+signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, _handle_signal)
 
 def read_ir_sensors():
     """Read IR sensor states"""
